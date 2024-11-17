@@ -10,7 +10,7 @@ import random
 
 from evaluate_utils import evaluate_relaxed_accuracy, evaluateANLS, evaluate_exact_match_accuracy
 
-from mm_interleaved.models.utils.monkey_patch import (
+from TextHarmony.models.utils.monkey_patch import (
     replace_llama_attn_with_flash_attn,
     replace_blip2_attn_with_qknorm_attn,
     replace_beam_search,
@@ -27,16 +27,16 @@ if IS_TRAIN:
     replace_llama_attn_with_flash_attn()
 
 
-from mm_interleaved.models import MMInterleaved
-from mm_interleaved.custom_datasets.utils import create_transform
-from mm_interleaved.custom_datasets.wds_utils import init_tokenizer
-from mm_interleaved.utils import (
+from TextHarmony.models import TextHarmony
+from TextHarmony.custom_datasets.utils import create_transform
+from TextHarmony.custom_datasets.wds_utils import init_tokenizer
+from TextHarmony.utils import (
     ArgumentParser,
     TrainingArguments,
     init_distributed_mode,
     load_model_weights,
 )
-from mm_interleaved.utils.clip_sim_score import tensor_to_pil
+from TextHarmony.utils.clip_sim_score import tensor_to_pil
 
 import torch.distributed as dist
 from torch.utils.data import Dataset, DataLoader
@@ -178,7 +178,7 @@ class MyDataset(Dataset):
 
 
 def main():
-    setup_seed(32) #(42)
+    setup_seed(32)
     parser = ArgumentParser(TrainingArguments)
     init_distributed_mode()
     args = parser.parse_args_with_config_file_into_dataclasses()
@@ -195,7 +195,7 @@ def main():
     
 
     print("Model Init Start")
-    model = MMInterleaved(**config.model)
+    model = TextHarmony(**config.model)
     if getattr(config, "load_from", None):
         load_model_weights(model, config.load_from, image_upscale=config.image_upscale)
     model = model.to(device="cuda:{}".format(device_id))
@@ -240,16 +240,16 @@ def main():
     
     from tqdm import tqdm
     for i in tqdm(dataloader):
-        # image = data[i]["image"] if "image" in data[i] else data[i]["image_path"]
-        image = 'data/chartqa/ChartQA Dataset/test/png/' + data[i]["imgname"] # !!!
-        question =  data[i]["query"]
-        # question = data[i]["question"] # 
+        image = data[i]["image"] if "image" in data[i] else data[i]["image_path"]
+        # image = 'data/chartqa/ChartQA Dataset/test/png/' + data[i]["imgname"] # !!!
+        # question =  data[i]["query"]
+        question = data[i]["question"] # 
         image_paths = [os.path.join(config.data_root, image)]
         response = model_gen(ddp_model.module, image_paths, question, transform, tokenizer, num_img_token=config.model.num_img_token, generation_kwargs=config.inference.generation_kwargs)[0]
         human_part.append({
             'answer': response,
-            'annotation': data[i]['label'],
-            # 'annotation': data[i]['answer'] if 'answer' in data[i] else data[i]['answers'],
+            #'annotation': data[i]['label'],
+            'annotation': data[i]['answer'] if 'answer' in data[i] else data[i]['answers'],
         }) 
 
     # 收集所有进程的 human_part 列表

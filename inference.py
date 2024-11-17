@@ -8,7 +8,7 @@ import torch
 from torchvision.utils import save_image
 import random
 
-from mm_interleaved.models.utils.monkey_patch import (
+from TextHarmony.models.utils.monkey_patch import (
     replace_llama_attn_with_flash_attn,
     replace_blip2_attn_with_qknorm_attn,
     replace_beam_search,
@@ -25,16 +25,16 @@ if IS_TRAIN:
     replace_llama_attn_with_flash_attn()
 
 
-from mm_interleaved.models import MMInterleaved
-from mm_interleaved.custom_datasets.utils import create_transform
-from mm_interleaved.custom_datasets.wds_utils import init_tokenizer
-from mm_interleaved.utils import (
+from TextHarmony.models import TextHarmony
+from TextHarmony.custom_datasets.utils import create_transform
+from TextHarmony.custom_datasets.wds_utils import init_tokenizer
+from TextHarmony.utils import (
     ArgumentParser,
     TrainingArguments,
     init_distributed_mode,
     load_model_weights,
 )
-from mm_interleaved.utils.clip_sim_score import tensor_to_pil
+from TextHarmony.utils.clip_sim_score import tensor_to_pil
 
 
 def load_annt_data(
@@ -104,12 +104,6 @@ def load_annt_data(
         target_image_idxs = torch.tensor([num_images - 1], dtype=torch.long)
 
         """MOE"""
-        # task_identifiers = [
-        #     "Generate an image",
-        #     "segmentation map of the text",
-        #     "Fill the masked",
-        #     ""
-        # ]
         task_identifiers = [
             ["Generate an image", "Fill the masked"],
             [""]
@@ -126,7 +120,6 @@ def load_annt_data(
                     info["task_id"] = task_id
                     break
         assert info["task_id"] is not None
-        # print('task_id: ', info["task_id"])
 
         """"""
         
@@ -333,7 +326,7 @@ def main():
     print(config)
 
     print("Model Init Start")
-    model = MMInterleaved(**config.model)
+    model = TextHarmony(**config.model)
 
     if getattr(config, "load_from", None):
         load_model_weights(model, config.load_from, image_upscale=config.image_upscale)

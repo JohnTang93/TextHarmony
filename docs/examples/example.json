@@ -42,5 +42,18 @@
         "image_first": [true, true], 
         "generate_mode": "generate_images", 
         "num_iter": 1
+    },
+
+    {
+        "sentences": [
+            "Answer the following question based on the image. Question: Who wrote this book? Answer:"
+        ], 
+        "images": [
+            "TextHarmony/docs/examples/book.jpg"
+        ], 
+        "sentence_ixs": [0], 
+        "image_first": [true], 
+        "generate_mode": "generate_texts", 
+        "num_iter": 1
     }
 ]
