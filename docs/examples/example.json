@@ -46,7 +46,7 @@
 
     {
         "sentences": [
-            "Answer the following question based on the image. Question: Who wrote this book? Answer:"
+            "Who wrote this book?"
         ], 
         "images": [
             "TextHarmony/docs/examples/book.jpg"
